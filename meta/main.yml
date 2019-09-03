@@ -1,0 +1,18 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: apache_tls
+  author: Martin Kuba
+  company: CESNET
+  description: Installs Apache HTTPD and configures TLS correctly
+  license: Apache
+  min_ansible_version: 2.5
+  platforms:
+    - name: Debian
+      versions:
+        - stretch
+        - buster
+  galaxy_tags:
+    - metacentrum
+    - system
