@@ -26,7 +26,7 @@
 
 - name: Enable Apache modules
   apache2_module:
-    name: "{{item}}"
+    name: "{{ item }}"
     state: present
   with_items:
     - headers
@@ -100,24 +100,24 @@
   notify:
     - "restart apache"
 
-- name: "Make {{certs_dir}} directory"
+- name: "Make {{ certs_dir }} directory"
   file:
-    path: "{{certs_dir}}"
+    path: "{{ certs_dir }}"
     state: directory
     mode: 0755
 
-- name: "create {{terena_ev_chain_file}}"
+- name: "create {{ terena_ev_chain_file }}"
   copy:
-    dest: "{{terena_ev_chain_file}}"
-    content: "{{terena_ev_chain}}"
+    dest: "{{ terena_ev_chain_file }}"
+    content: "{{ terena_ev_chain }}"
     owner: root
     group: root
     mode: 0644
 
-- name: "create {{terena_dv_chain_file}}"
+- name: "create {{ terena_dv_chain_file }}"
   copy:
-    dest: "{{terena_dv_chain_file}}"
-    content: "{{terena_dv_chain}}"
+    dest: "{{ terena_dv_chain_file }}"
+    content: "{{ terena_dv_chain }}"
     owner: root
     group: root
     mode: 0644
