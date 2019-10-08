@@ -121,3 +121,6 @@
     owner: root
     group: root
     mode: 0644
+
+- name: "flush handlers"
+  meta: flush_handlers
