@@ -5,8 +5,8 @@
   assert:
     that:
       - certs_dir is defined
-      - terena_ev_chain is defined
-      - terena_dv_chain is defined
+      - geant_rsa_chain is defined
+      - geant_ecc_chain is defined
 
 - name: Install Apache
   package:
@@ -106,18 +106,18 @@
     state: directory
     mode: 0755
 
-- name: "create {{ terena_ev_chain_file }}"
+- name: "create {{ geant_rsa_chain_file }}"
   copy:
-    dest: "{{ terena_ev_chain_file }}"
-    content: "{{ terena_ev_chain }}"
+    dest: "{{ geant_rsa_chain_file }}"
+    content: "{{ geant_rsa_chain }}"
     owner: root
     group: root
     mode: 0644
 
-- name: "create {{ terena_dv_chain_file }}"
+- name: "create {{ geant_ecc_chain_file }}"
   copy:
-    dest: "{{ terena_dv_chain_file }}"
-    content: "{{ terena_dv_chain }}"
+    dest: "{{ geant_ecc_chain_file }}"
+    content: "{{ geant_ecc_chain }}"
     owner: root
     group: root
     mode: 0644
