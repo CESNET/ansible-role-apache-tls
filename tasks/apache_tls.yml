@@ -85,14 +85,13 @@
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
     insertbefore: '</IfModule>'
     block: |
-      # see https://mozilla.github.io/server-side-tls/ssl-config-generator/?server=apache-2.4.38&openssl=1.1.1b&hsts=yes&profile=modern
+      # see https://ssl-config.mozilla.org/#server=apache&version=2.4.52&config=intermediate&openssl=1.1.1k&guideline=5.6
       SSLProtocol             all -SSLv3 -TLSv1 -TLSv1.1
-      SSLCipherSuite          ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256
-      SSLHonorCipherOrder     on
-      SSLCompression          off
+      SSLCipherSuite          ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+      SSLHonorCipherOrder     off
       SSLSessionTickets       off
 
-      # OCSP Stapling, only in httpd 2.3.3 and later
+      # OCSP Stapling
       SSLUseStapling          on
       SSLStaplingResponderTimeout 5
       SSLStaplingReturnResponderErrors off
