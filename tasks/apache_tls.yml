@@ -1,21 +1,14 @@
 ---
 # tasks file for apache-tls
 
-- name: Check that variables are defined
-  assert:
-    that:
-      - certs_dir is defined
-      - geant_rsa_chain is defined
-      - geant_ecc_chain is defined
-
-- name: Install Apache
+- name: "install Apache"
   package:
     name:
       - apache2
       - cronolog
     state: present
 
-- name: create config for HTTP2 module if not present
+- name: "create config for HTTP2 module if not present"
   copy:
     force: no
     dest: /etc/apache2/mods-available/http2.conf
@@ -24,7 +17,7 @@
           Protocols h2 h2c http/1.1
       </IfModule>
 
-- name: Enable Apache modules
+- name: "enable Apache modules"
   apache2_module:
     name: "{{ item }}"
     state: present
@@ -32,11 +25,12 @@
     - headers
     - ssl
     - rewrite
+    - socache_shmcb
     - http2
   notify:
     - "restart apache"
 
-- name: Use cronolog for error log rotation
+- name: "use cronolog for error log rotation"
   lineinfile:
     path: "/etc/apache2/apache2.conf"
     regexp: 'ErrorLog \${APACHE_LOG_DIR}/error.log'
@@ -45,7 +39,7 @@
   notify:
     - "restart apache"
 
-- name: Use cronolog for access log rotation
+- name: "use cronolog for access log rotation"
   lineinfile:
     path: "/etc/apache2/conf-enabled/other-vhosts-access-log.conf"
     regexp: 'CustomLog \${APACHE_LOG_DIR}/other_vhosts_access.log vhost_combined'
@@ -54,7 +48,7 @@
   notify:
     - "restart apache"
 
-- name: Set ServerTokens level to Production
+- name: "set ServerTokens level to Production"
   lineinfile:
     path: "/etc/apache2/conf-enabled/security.conf"
     regexp: 'ServerTokens OS'
@@ -63,15 +57,15 @@
   notify:
     - "restart apache"
 
-- name: Comment out default SSLCipherSuite
+- name: "comment out default SSLCipherSuite"
   lineinfile:
-    path: "/etc/apache2/mods-enabled/ssl.conf"
+    path: "/etc/apache2/mods-available/ssl.conf"
     regexp: 'SSLCipherSuite HIGH:!aNULL'
     line: ' #SSLCipherSuite HIGH:!aNULL'
   notify:
     - "restart apache"
 
-- name: Comment out default SSLProtocol
+- name: "comment out default SSLProtocol"
   lineinfile:
     path: "/etc/apache2/mods-enabled/ssl.conf"
     regexp: 'SSLProtocol all -SSLv3'
@@ -79,47 +73,35 @@
   notify:
     - "restart apache"
 
-- name: Set up TLS correctly
+- name: "set up TLS correctly"
   blockinfile:
     dest: "/etc/apache2/mods-enabled/ssl.conf"
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
     insertbefore: '</IfModule>'
     block: |
-      # see https://ssl-config.mozilla.org/#server=apache&version=2.4.52&config=intermediate&openssl=1.1.1k&guideline=5.6
-      SSLProtocol             all -SSLv3 -TLSv1 -TLSv1.1
+      # generated 2025-06-18, Mozilla Guideline v5.6, Apache 2.4.63, OpenSSL 3.5.0, intermediate config
+      # https://ssl-config.mozilla.org/#server=apache&version=2.4.63&config=intermediate&openssl=3.5.0&guideline=5.6
+      
+      # this configuration requires mod_ssl, mod_rewrite, mod_headers, and mod_socache_shmcb
+      # intermediate configuration
+      SSLProtocol             -all +TLSv1.2 +TLSv1.3
+      SSLOpenSSLConfCmd       Curves X25519:prime256v1:secp384r1
       SSLCipherSuite          ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
       SSLHonorCipherOrder     off
       SSLSessionTickets       off
-
+      
+      {% if apache_tls_ocsp_stapling %}
       # OCSP Stapling
       SSLUseStapling          on
       SSLStaplingResponderTimeout 5
       SSLStaplingReturnResponderErrors off
-      SSLStaplingCache        shmcb:/var/run/ocsp(128000)
+      SSLStaplingCache        shmcb:/var/run/ocsp(32768)
+      {% else %}
+      # OCSP Stapling not enabled
+      SSLUseStapling          off
+      {% endif %}
   notify:
     - "restart apache"
-
-- name: "Make {{ certs_dir }} directory"
-  file:
-    path: "{{ certs_dir }}"
-    state: directory
-    mode: 0755
-
-- name: "create {{ geant_rsa_chain_file }}"
-  copy:
-    dest: "{{ geant_rsa_chain_file }}"
-    content: "{{ geant_rsa_chain }}"
-    owner: root
-    group: root
-    mode: 0644
-
-- name: "create {{ geant_ecc_chain_file }}"
-  copy:
-    dest: "{{ geant_ecc_chain_file }}"
-    content: "{{ geant_ecc_chain }}"
-    owner: root
-    group: root
-    mode: 0644
 
 - name: "flush handlers"
   meta: flush_handlers
